@@ -1,16 +1,19 @@
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>سعر الذهب في عمان - أصالة للمجوهرات</title>
-    <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
-    
+    <link rel="stylesheet"
+        href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
+
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f5f7fa;
@@ -18,23 +21,27 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px;
             color: #333;
         }
+
         .container {
             background-color: #ffffff;
-            padding: 30px;
+            padding: 15px;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             text-align: center;
-            max-width: 480px; /* تم توسيعه قليلاً ليتناسب مع الجداول */
+            max-width: 480px;
+            /* تم توسيعه قليلاً ليتناسب مع الجداول */
             width: 100%;
         }
+
         h1 {
             font-size: 26px;
             margin-bottom: 5px;
             color: #d4af37;
         }
+
         h4 {
             font-size: 13px;
             font-weight: normal;
@@ -45,11 +52,13 @@
             align-items: center;
             gap: 5px;
         }
+
         h4 i {
             color: #d4af37;
             position: relative;
             top: 2px;
         }
+
         button {
             background-color: #d4af37;
             color: white;
@@ -60,25 +69,29 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
+            width: 75%;
             box-shadow: 0 4px 10px rgba(212, 175, 55, 0.2);
         }
+
         button:hover {
             background-color: #aa8c2c;
             transform: translateY(-2px);
         }
+
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
+
         .result {
             margin-top: 25px;
             padding: 5px;
             border-radius: 8px;
             min-height: 120px;
         }
+
         .initial-text {
             padding: 20px;
             background-color: #fcf9f2;
@@ -86,43 +99,61 @@
             border-radius: 8px;
             color: #7f8c8d;
         }
+
         .price-usd {
-            font-size: 13px;
+            font-size: smaller;
             color: #95a5a6;
             margin-bottom: 15px;
-			text-align: left;
+            text-align: middle;
         }
+		
+        .price-title {
+            font-size: 10px;
+            color: #95a5a6;
+            margin-bottom: 12px;
+            text-align: right;
+        }
+
         /* تصميم جدول العيارات */
         .karat-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
             background-color: #fdfbf7;
-            border-radius: 8px;
+            border-radius: 5px;
             overflow: hidden;
             border: 1px solid #f1e6c7;
+			margin: 5px;
         }
+
         .karat-table td {
             padding: 12px 15px;
             border-bottom: 1px solid #f1e6c7;
         }
+
         .karat-table tr:last-child td {
             border-bottom: none;
         }
+
         .karat-title {
             font-weight: 600;
             color: #2c3e50;
             text-align: right;
+            font-size: small;
         }
+
         .karat-value {
             font-weight: bold;
             color: #2c3e50;
             text-align: left;
-            font-size: 20px;
+            font-size: 16px;
         }
+
         .karat-table tr:first-child .karat-value {
-            color: #b89214; /* تمييز عيار 24 بلون ذهبي غامق */
+            color: #b89214;
+            /* تمييز عيار 24 بلون ذهبي غامق */
         }
+
         /* قسم السبائك */
         .section-title {
             font-size: 14px;
@@ -133,12 +164,14 @@
             border-right: 3px solid #d4af37;
             padding-right: 8px;
         }
+
         .bars-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 15px;
         }
+
         .bar-card {
             background: #fff;
             border: 1px solid #eef2f5;
@@ -147,24 +180,28 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
         }
+
         .bar-name {
             font-size: 12px;
             color: #7f8c8d;
             margin-bottom: 4px;
         }
+
         .bar-price {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
             color: #2c3e50;
         }
+
         .global-price {
-            font-size: 14px;
+            font-size: 12px;
             color: #2c3e50;
         }
+
         .request-time {
-            font-size: 11px;
+            font-size: 10px;
             color: #95a5a6;
             margin-top: 15px;
             border-top: 1px dashed #e6dec9;
@@ -172,6 +209,7 @@
             width: 100%;
             text-align: center;
         }
+
         .error {
             color: #e74c3c;
             background-color: #fde8e7;
@@ -182,14 +220,15 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
-        <h1>سعر الذهب</h1>
-        <h4><i class="fi fi-rr-phone-call"></i> +968 77101161 | أصالة للمجوهرات</h4>
-        
+        <h2>سعر الذهب</h2>
+        <h6><i class="fi fi-rr-phone-call"></i> +968 77101161 | أصالة للمجوهرات</h6>
+
         <button id="fetchBtn">احصل على السعر الآن</button>
-        
+
         <div class="result" id="result">
             <div class="initial-text">اضغط على الزر لعرض السعر الحالي للجرام والسبائك</div>
         </div>
@@ -201,7 +240,7 @@
             const resultDiv = document.getElementById('result');
 
             fetchBtn.addEventListener('click', async () => {
-                
+
                 fetchBtn.disabled = true;
                 fetchBtn.textContent = "جاري التحميل...";
                 resultDiv.innerHTML = '<div class="initial-text">جاري جلب البيانات من البورصة وتحديث الأسعار...</div>';
@@ -210,31 +249,31 @@
                     const response = await fetch("https://www.goldapi.io/api/XAU/USD", {
                         method: "GET",
                         headers: {
-                            "x-access-token": "goldapi-38mjrsma55r00e-io", 
+                            "x-access-token": "goldapi-38mjrsma55r00e-io",
                             "Content-Type": "application/json"
                         }
                     });
-                    
+
                     if (!response.ok) {
                         throw new Error("فشل الاتصال بالخادم");
                     }
-                    
+
                     /* تم تصحيح الخطأ هنا: تم إزالة تعليقات الـ HTML التي كانت مدمجة في الجافا سكريبت 
                        ويمكنك مستقبلاً إضافة كود الفضة هنا باستخدام تعليقات الـ JS العادية مثل هذا السطر.
                     */
 
                     const data = await response.json();
-                    
+
                     if (data && data.price) {
                         const priceUSD = data.price;
-                        const omrExchangeRate = 0.3863; 
+                        const omrExchangeRate = 0.3863;
                         const oneGram = 31.1034;
                         const twntiOne = 0.875;
-                        
+
                         const priceOMR = priceUSD * omrExchangeRate;
                         const gramOMR = priceOMR / oneGram;
                         const omaniType = gramOMR * twntiOne;
-                        
+
                         // حسابات السبائك الخاصة بك بناءً على معادلاتك الدقيقة
                         const parOne = gramOMR + 8;
                         const parTow = (gramOMR * 2.5) + 9;
@@ -255,15 +294,15 @@
                             <table class="karat-table">
                                 <tr>
                                     <td class="karat-title">عيار 24</td>
-									<td class="price-usd">(999.)</td>
+                                    <td class="price-title">(999.)</td>
                                     <td class="karat-value">${gramOMR.toFixed(3)} ر.ع.</td>
-                                    <td class="price-usd">لكل جرام</td>
+                                    <td class="price-title">لكل جرام</td>
                                 </tr>
                                 <tr>
                                     <td class="karat-title">عيار 21</td>
-									<td class="price-usd">(875.)</td>
+                                    <td class="price-title">(875.)</td>
                                     <td class="karat-value">${omaniType.toFixed(3)} ر.ع.</td>
-									 <td class="price-usd">لكل جرام</td>
+                                     <td class="price-title">لكل جرام</td>
                                 </tr>
                             </table>
 
@@ -314,4 +353,5 @@
     </script>
 
 </body>
+
 </html>
