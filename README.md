@@ -1,9 +1,10 @@
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أسعار الذهب والفضة مباشرة - سلطنة عمان</title>
+    <title>شاشة أسعار الذهب والفضة المباشرة - أصالة للمجوهرات</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
@@ -86,7 +87,6 @@
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
         }
         
-        /* تصميم العداد والوقت الحي في الشريط الأسود */
         #liveTimeText {
             font-family: monospace; font-size: 13px; color: #e9d5af; font-weight: bold; direction: ltr;
         }
@@ -113,7 +113,6 @@
         .karat-value { font-weight: 700; color: var(--dark-gold); text-align: left; font-size: 16px; }
         .silver-table .karat-value { color: #3e4854; }
 
-        /* تصفيف خاص للعيارات الثانوية (18 و 22) لتكون أقل بروزاً */
         .karat-table tr.sub-karat td { padding: 10px 16px; background-color: #fafbfc; }
         .karat-table tr.sub-karat .karat-title { color: var(--text-muted); font-weight: 500; font-size: 13px; }
         .karat-table tr.sub-karat .karat-value { color: #7e8b9b; font-size: 14px; font-weight: 600; }
@@ -153,60 +152,93 @@
                 <div class="pulse-dot"></div>
                 <span>البورصة الحية</span>
             </div>
-            <div id="liveTimeText">00:00:00 م</div>
+            <div id="liveTimeText">--:--:--</div>
         </div>
 
         <div id="mainDashboard">
-            <div class="initial-text">جاري ربط الشاشة بـ UniRateAPI وتفعيل عيارات الذهب والفضة الحية...</div>
+            <div class="initial-text">جاري جلب أسعار الذهب والفضة المباشرة لسلطنة عمان...</div>
         </div>
     </div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const mainDashboard = document.getElementById('mainDashboard');
-        const liveTimeText = document.getElementById('liveTimeText');
-        
-        // =========================================================
-        // تأكد من وضع مفتاحك السري الصحيح هنا بين علامتي التنصيص
-        // =========================================================
-        const UNIRATE_API_KEY = "Avww0sIzaEZMC2OqqbSRVbJNvcA7lNuR1f8s7zQdF1ubikTxo4CgSd2MguekplF1"; 
-        const UPDATE_INTERVAL_MS = 2000; 
-        
-        // الرابط الرسمي الموحد للمعادن
-        const LIVE_URL = `https://api.unirateapi.com/api/commodities/rates?api_key=${UNIRATE_API_KEY}`; 
+        document.addEventListener("DOMContentLoaded", () => {
+            const mainDashboard = document.getElementById('mainDashboard');
+            const liveTimeText = document.getElementById('liveTimeText');
+            
+            // مفتاح باقة UniRate الاحتياطية الخاصة بك (تأكد من كتابته هنا بشكل صحيح)
+            const UNIRATE_API_KEY = "Avww0sIzaEZMC2OqqbSRVbJNvcA7lNuR1f8s7zQdF1ubikTxo4CgSd2MguekplF1"; 
+            
+            // وقت التحديث التلقائي (35 ثانية)
+            const UPDATE_INTERVAL_MS = 35000; 
 
-        let oldGold24 = null, oldGold22 = null, oldGold21 = null, oldGold18 = null, oldSilver999 = null, oldSilver925 = null;
+            let oldGold24 = null, oldGold22 = null, oldGold21 = null, oldGold18 = null, oldSilver999 = null, oldSilver925 = null;
 
-        async function fetchLivePrices() {
-            try {
-                const response = await fetch(LIVE_URL);
-                
-                // إذا رفض السيرفر الطلب، سنعرف السبب من كود الحالة الهوية (Status)
-                if (!response.ok) {
-                    throw new Error(`استجابة السيرفر خاطئة الكود: ${response.status} (${response.statusText})`);
+            async function fetchLivePrices() {
+                let priceUSDGold = null;
+                let priceUSDSilver = null;
+
+                // 1. المحاولة الأولى والأساسية: السحب المباشر والمضمون من GoldAPI الخاص بك
+                try {
+                    const [goldResponse, silverResponse] = await Promise.all([
+                        fetch("https://www.goldapi.io/api/XAU/USD", {
+                            method: "GET", headers: { "x-access-token": "goldapi-38mjrsma55r00e-io", "Content-Type": "application/json" }
+                        }),
+                        fetch("https://www.goldapi.io/api/XAG/USD", {
+                            method: "GET", headers: { "x-access-token": "goldapi-38mjrsma55r00e-io", "Content-Type": "application/json" }
+                        })
+                    ]);
+
+                    if (goldResponse.ok && silverResponse.ok) {
+                        const goldData = await goldResponse.json();
+                        const silverData = await silverResponse.json();
+                        priceUSDGold = goldData.price;
+                        priceUSDSilver = silverData.price;
+                    }
+                } catch (e) {
+                    console.log("حدث ضغط على سيرفر GoldAPI، جاري الانتقال فوراً للشبكة البديلة UniRate...");
                 }
 
-                const data = await response.json();
-
-                // قراءة مرنة للبيانات المستلمة
-                const priceUSDGold = data.XAU || data.rates?.XAU || data.data?.XAU; 
-                const priceUSDSilver = data.XAG || data.rates?.XAG || data.data?.XAG;
-
+                // 2. المحاولة الاحتياطية: في حال تعطل الأول، اسحب من سيرفر UniRate الاحترافي الخاص بك
                 if (!priceUSDGold || !priceUSDSilver) {
-                    throw new Error("تم الاتصال بنجاح ولكن السيرفر لم يرسل أسعار الذهب والفضة (XAU/XAG). تأكد من إعدادات باقتك.");
+                    try {
+                        const response = await fetch(`https://api.unirateapi.com/v1/rates/latest?api_key=${UNIRATE_API_KEY}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            // قراءة الأسعار وفق البنية الدقيقة لمزود البيانات الاحترافي
+                            if (data.rates) {
+                                priceUSDGold = 1 / data.rates.XAU;
+                                priceUSDSilver = 1 / data.rates.XAG;
+                            }
+                        }
+                    } catch (fallbackError) {
+                        console.error("تعذر الاتصال بكلا السيرفرين", fallbackError);
+                    }
                 }
 
+                // 3. عرض وتحديث واجهة الشاشة بالأسعار الصحيحة
+                if (priceUSDGold && priceUSDSilver) {
+                    renderDashboard(priceUSDGold, priceUSDSilver);
+                } else {
+                    // حماية الشاشة من التوقف في حال انقطاع النت بالمحل كلياً بـعرض آخر تحديث محفوظ
+                    if(oldGold24) {
+                        renderDashboard(oldGold24 / (0.3863 / 31.1034), oldSilver999 / (0.3863 / 31.1034));
+                    } else {
+                        mainDashboard.innerHTML = `<div style="color:#d93838; padding:15px; background:#fff5f5; border:1px solid #fecdcd; border-radius:12px; font-size:14px;">⚠️ تعذر تحديث الأسعار الحية، يرجى التحقق من اتصال شاشة العرض بالإنترنت.</div>`;
+                    }
+                }
+            }
+
+            function renderDashboard(priceUSDGold, priceUSDSilver) {
                 const omrExchangeRate = 0.3863;
                 const oneGram = 31.1034; 
 
-                const gramOMRGold = ((priceUSDGold + 4) * omrExchangeRate) / oneGram; 
+                const gramOMRGold = (priceUSDGold * omrExchangeRate) / oneGram; 
                 const gramOMRGold22 = gramOMRGold * (22 / 24);                  
-                const omaniTypeGold = gramOMRGold * (21 / 24);                      
-                const omaniTypeGoldb = gramOMRGold * 0.880;                  
+                const omaniTypeGold = gramOMRGold * 0.875;                      
                 const gramOMRGold18 = gramOMRGold * (18 / 24);                  
 
-                const gramOMRSilver999 = ((priceUSDSilver + 0.3) * omrExchangeRate) / oneGram; 
-                const gramOMRSilverPar = gramOMRSilver999 + 2; 
+                const gramOMRSilver999 = (priceUSDSilver * omrExchangeRate) / oneGram; 
+                const gramOMRSilver925 = gramOMRSilver999 * 0.925; 
 
                 const parOneGold = gramOMRGold + 8;
                 const parTowGold = (gramOMRGold * 2.5) + 9;
@@ -215,13 +247,12 @@
                 const parTwinGold = (gramOMRGold * 20) + 15;
                 const parOunceGold = (gramOMRGold * oneGram) + 20;
 
-                
-                const silverBarOunce = (gramOMRSilverPar * oneGram) + 15;
-				const silverBar50g = (gramOMRSilverPar * 50) + 20;
-                const silverBar100g = (gramOMRSilverPar * 100) + 25.0;
-                const silverBar250g = (gramOMRSilverPar * 250) + 30.0;
-                const silverBar500g = (gramOMRSilverPar * 500) + 35.0;
-                const silverBarKilo = (gramOMRSilverPar * 1000) + 50.0;
+                const silverBar10g = (gramOMRSilver999 * 10) + 1.5;
+                const silverBarOunce = (gramOMRSilver999 * oneGram) + 2.0;
+                const silverBar100g = (gramOMRSilver999 * 100) + 5.0;
+                const silverBar250g = (gramOMRSilver999 * 250) + 8.0;
+                const silverBar500g = (gramOMRSilver999 * 500) + 12.0;
+                const silverBarKilo = (gramOMRSilver999 * 1000) + 20.0;
 
                 const now = new Date();
                 const timeString = now.toLocaleTimeString('ar-OM', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -264,23 +295,19 @@
                             <td class="karat-value">${amaniTypeGold.toFixed(3)} ر.ع.</td>
                         </tr>
                         <tr class="sub-karat ${gold18Class}">
-                            <td class="karat-title">عيار 21 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(880.)</span></td>
-                            <td class="karat-value">${omaniTypeGoldb.toFixed(3)} ر.ع.</td>
-                        </tr>
-                        <tr class="sub-karat ${gold18Class}">
                             <td class="karat-title">عيار 18 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(750.)</span></td>
                             <td class="karat-value">${gramOMRGold18.toFixed(3)} ر.ع.</td>
                         </tr>
                     </table>
 
-                    <div class="section-title silver-border">الفضة</div>
+                    <div class="section-title silver-border">أسعار جرام الفضة</div>
                     <table class="karat-table silver-table">
                         <tr class="${silver999Class}">
-                            <td class="karat-title">جرام الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 999</span></td>
+                            <td class="karat-title">فضة نقية <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 999</span></td>
                             <td class="karat-value">${gramOMRSilver999.toFixed(3)} ر.ع.</td>
                         </tr>
                         <tr class="${silver925Class}">
-                            <td class="karat-title">كيلو الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 999</span></td>
+                            <td class="karat-title">فضة إسترليني <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 925</span></td>
                             <td class="karat-value">${gramOMRSilver925.toFixed(3)} ر.ع.</td>
                         </tr>
                     </table>
@@ -303,8 +330,8 @@
                         <span class="toggle-icon">${isSilverOpen ? '▲' : '▼'}</span>
                     </div>
                     <div class="accordion-content ${isSilverOpen ? 'show' : ''}" id="silverAccordionContent">
+                        <div class="bar-card"><span class="bar-name">سبيكة 10 جرام</span><span class="bar-price">${silverBar10g.toFixed(3)} ر.ع.</span></div>
                         <div class="bar-card"><span class="bar-name">سبيكة أونصة</span><span class="bar-price">${silverBarOunce.toFixed(3)} ر.ع.</span></div>
-						<div class="bar-card"><span class="bar-name">سبيكة 50 جرام</span><span class="bar-price">${silverBar50g.toFixed(3)} ر.ع.</span></div>
                         <div class="bar-card"><span class="bar-name">سبيكة 100 جرام</span><span class="bar-price">${silverBar100g.toFixed(3)} ر.ع.</span></div>
                         <div class="bar-card"><span class="bar-name">سبيكة 250 جرام</span><span class="bar-price">${silverBar250g.toFixed(3)} ر.ع.</span></div>
                         <div class="bar-card"><span class="bar-name">سبيكة 500 جرام</span><span class="bar-price">${silverBar500g.toFixed(3)} ر.ع.</span></div>
@@ -315,40 +342,31 @@
                 `;
 
                 setupAccordions();
-            } catch (error) {
-                // عرض نص الخطأ المفصل مباشرة على الشاشة للمستخدم بدلاً من الكونسول فقط
-                console.error("خطأ التحديث التلقائي:", error);
-                mainDashboard.innerHTML = `<div class="error">⚠️ خطأ في الاتصال: ${error.message}<br><small>يرجى التأكد من صحة الـ API Key في الكود البرمجي.</small></div>`;
             }
-        }
 
-        function getFlashClass(newPrice, oldPrice) {
-            if (!oldPrice) return "";
-            if (newPrice.toFixed(3) > oldPrice.toFixed(3)) return "bg-flash-up";
-            if (newPrice.toFixed(3) < oldPrice.toFixed(3)) return "bg-flash-down";
-            return "";
-        }
+            function getFlashClass(newPrice, oldPrice) {
+                if (!oldPrice) return "";
+                if (newPrice.toFixed(3) > oldPrice.toFixed(3)) return "bg-flash-up";
+                if (newPrice.toFixed(3) < oldPrice.toFixed(3)) return "bg-flash-down";
+                return "";
+            }
 
-        function setupAccordions() {
-            document.getElementById('goldHeader').addEventListener('click', () => toggleAccordion('goldAccordionContent', 'goldHeader'));
-            document.getElementById('silverHeader').addEventListener('click', () => toggleAccordion('silverAccordionContent', 'silverHeader'));
-        }
+            function setupAccordions() {
+                document.getElementById('goldHeader').addEventListener('click', () => toggleAccordion('goldAccordionContent', 'goldHeader'));
+                document.getElementById('silverHeader').addEventListener('click', () => toggleAccordion('silverAccordionContent', 'silverHeader'));
+            }
 
-        function toggleAccordion(contentId, headerId) {
-            const content = document.getElementById(contentId);
-            const icon = document.getElementById(headerId).querySelector('.toggle-icon');
-            content.classList.toggle('show');
-            icon.textContent = content.classList.contains('show') ? '▲' : '▼';
-        }
+            function toggleAccordion(contentId, headerId) {
+                const content = document.getElementById(contentId);
+                const icon = document.getElementById(headerId).querySelector('.toggle-icon');
+                content.classList.toggle('show');
+                icon.textContent = content.classList.contains('show') ? '▲' : '▼';
+            }
 
-        fetchLivePrices();
-        setInterval(fetchLivePrices, UPDATE_INTERVAL_MS);
-    });
-</script>
-
-</body>
-
-</html>
+            fetchLivePrices();
+            setInterval(fetchLivePrices, UPDATE_INTERVAL_MS);
+        });
+    </script>
 
 </body>
 
