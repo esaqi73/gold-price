@@ -4,12 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شاشة أسعار الذهب والفضة المباشرة - أصالة للمجوهرات</title>
+    <title>أسعار الذهب والفضة مباشر - عمان</title>
+    <!-- 👇 هذا هو السطر الجديد الخاص بالشعار 👇 -->
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
-
+    
     <style>
         :root {
             --primary-gold: #c5a059;
@@ -104,6 +106,7 @@
             padding: 10px 16px;
             border-radius: var(--radius-md);
             margin-bottom: 20px;
+            margin-top: 20px;
             font-size: 12px;
         }
 
@@ -204,7 +207,7 @@
         .karat-table td {
             padding: 14px 16px;
             border-bottom: 1px solid #eef1f5;
-            font-size: 16px;
+            font-size: 17px;
             transition: background-color 0.4s ease;
         }
 
@@ -335,6 +338,7 @@
             flex-direction: column;
             gap: 4px;
             transition: var(--transition);
+            cursor: pointer; 
         }
 
         .bar-card:hover {
@@ -357,6 +361,16 @@
         }
 
         .request-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 25px; 
+            border-top: 1px dashed #e2e7ee;
+            padding-top: 12px;
+            text-align: center;
+        }
+
+        
+        .asala-number {
             font-size: 11px;
             color: var(--text-muted);
             margin-top: 25px;
@@ -409,13 +423,13 @@
             <h6><i class="fi fi-rr-phone-call"></i> +968 77101161</h6>
             <h6><i class="fi fi-rr-phone-call"></i> +968 77035376</h6>
         </div> -->
-       
+
         <div class="live-status">
             <div class="live-pulse">
                 <div class="pulse-dot"></div>
                 <span>البورصة الحية</span>
             </div>
-            <div id="liveTimeText">--:--:--</div>
+            <div id="liveTimeText" dir="ltr" lang="en">--:--:--</div>
         </div>
 
         <div id="mainDashboard">
@@ -425,90 +439,123 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            const mainDashboard = document.getElementById('mainDashboard');
-            const liveTimeText = document.getElementById('liveTimeText');
+                const mainDashboard = document.getElementById('mainDashboard');
+                const liveTimeText = document.getElementById('liveTimeText');
 
-            // ============================================================
-            // 🔒 الأمان: المفتاح لم يعد موجوداً هنا! يتم جلبه من الخادم
-            // ============================================================
+                // إعدادات التحديث
+                const UPDATE_INTERVAL_MS = 60000; // 60 ثانية
+                const OMR_EXCHANGE_RATE = 0.388;
+                const ONE_GRAM = 31.1034;       
 
-            // إعدادات التحديث
-            const UPDATE_INTERVAL_MS = 60000; // 60 ثانية
-            const OMR_EXCHANGE_RATE = 0.3863;
-            const ONE_GRAM = 31.1034;
+                let previousPrices = {
+                    gold24: null, gold22: null, gold21: null, gold18: null,
+                    silver999: null, silver925: null, usdGold: null, usdSilver: null
+                };
 
-            // تخزين القيم السابقة للمقارنة
-            let previousPrices = {
-                gold24: null,
-                gold22: null,
-                gold21: null,
-                gold18: null,
-                silver999: null,
-                silver925: null,
-                usdGold: null,
-                usdSilver: null
-            };
+                let isUpdating = false;
+                let updateTimeout = null;
 
-            // متغير لمنع التحديثات المتداخلة
-            let isUpdating = false;
-            let updateTimeout = null;
+                // ============================================================
+                // 🕒 دالة الساعة المباشرة (تعمل وحدها بالإنجليزية)
+                // ============================================================
+                // function updateLiveTime() {
+                //     const now = new Date();
+                //     const timeString = now.toLocaleTimeString('en-US', {
+                //         hour12: true,
+                //         hour: '2-digit',
+                //         minute: '2-digit',
+                //         second: '2-digit'
+                //     });
+                //     if (liveTimeText) {
+                //         liveTimeText.innerText = timeString;
+                //     }
+                // }
 
-            // ============================================================
-            // 🔐 دالة جلب الأسعار من الخادم الآمن
-            // ============================================================
-            async function fetchLivePrices() {
-                // منع التحديثات المتداخلة
-                if (isUpdating) return;
-                isUpdating = true;
+                // ============================================================
+                // 💬 دالة إرسال الطلب عبر الواتساب
+                // ============================================================
+                window.sendWhatsApp = function(itemName, itemPrice) {
+                    // ضع رقم الواتساب الخاص بالمحل هنا (مع رمز الدولة وبدون أصفار أو علامة +)
+                    const phoneNumber = "96877101161"; 
+                    
+                    // تجهيز الرسالة
+                    const message = `مرحباً أصالة للمجوهرات، أنا مهتم بشراء (${itemName}) المعروضة بسعر (${itemPrice} ر.ع.). كيف يمكنني إتمام الدفع والاستلام؟`;
+                    
+                    // تحويل النص لصيغة يقبلها متصفح الويب
+                    const encodedMessage = encodeURIComponent(message);
+                    
+                    // فتح تطبيق الواتساب في نافذة جديدة
+                    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+                };
 
-                try {
-                    // ✅ الاتصال بالخادم الخاص بك بدلاً من الـ API مباشرة
-                    const response = await fetch('/api/prices', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            // يمكن إضافة توكن للمصادقة إذا أردت
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
+                // ============================================================
+                // 🕒 دالة الساعة المباشرة (أرقام إنجليزية ومؤشر عربي)
+                // ============================================================
+                function updateLiveTime() {
+                    const now = new Date();
+                    let timeString = now.toLocaleTimeString('en-US', {
+                        hour12: true,
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    // سحر الاستبدال: تحويل AM إلى ص و PM إلى م
+                    timeString = timeString.replace('AM', 'ص').replace('PM', 'م');
+
+                    if (liveTimeText) {
+                        liveTimeText.innerText = timeString;
                     }
-
-                    const data = await response.json();
-
-                    // التحقق من صحة البيانات
-                    if (!data || typeof data.priceUSDGold !== 'number' || typeof data.priceUSDSilver !== 'number') {
-                        throw new Error('بيانات غير صالحة من الخادم');
-                    }
-
-                    // تحديث الأسعار
-                    renderDashboard(data.priceUSDGold, data.priceUSDSilver);
-
-                } catch (error) {
-                    console.error('❌ فشل جلب الأسعار:', error.message);
-
-                    // محاولة استخدام آخر سعر محفوظ
-                    if (previousPrices.usdGold && previousPrices.usdSilver) {
-                        renderDashboard(previousPrices.usdGold, previousPrices.usdSilver);
-                        showTemporaryMessage('⚠️ باستخدام آخر سعر معروف', '#fff3cd');
-                    } else {
-                        showError('⚠️ تعذر تحديث الأسعار. يرجى التحقق من اتصال الإنترنت.');
-                    }
-                } finally {
-                    isUpdating = false;
                 }
-            }
 
-            // ============================================================
+                // تشغيل الساعة فوراً ثم تحديثها كل ثانية
+                updateLiveTime();
+                setInterval(updateLiveTime, 1000);
+
+                // ============================================================
+                // 🔐 دالة جلب الأسعار من الخادم الآمن
+                // ============================================================
+                async function fetchLivePrices() {
+                    if (isUpdating) return;
+                    isUpdating = true;
+
+                    try {
+                        const response = await fetch('/api/prices', {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        });
+
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        const data = await response.json();
+
+                        if (!data || typeof data.priceUSDGold !== 'number') {
+                            throw new Error('بيانات غير صالحة من الخادم');
+                        }
+
+                        renderDashboard(data.priceUSDGold, data.priceUSDSilver);
+
+                    } catch (error) {
+                        console.error('❌ فشل جلب الأسعار:', error.message);
+                        if (previousPrices.usdGold && previousPrices.usdSilver) {
+                            renderDashboard(previousPrices.usdGold, previousPrices.usdSilver);
+                            showTemporaryMessage('⚠️ باستخدام آخر سعر معروف', '#fff3cd');
+                        } else {
+                            showError('⚠️ تعذر تحديث الأسعار. يرجى التحقق من اتصال الإنترنت.');
+                        }
+                    } finally {
+                        isUpdating = false;
+                    }
+                }
+
+                // ============================================================
             // 📊 دالة عرض البيانات
             // ============================================================
             function renderDashboard(priceUSDGold, priceUSDSilver) {
-                // حفظ الأسعار الحالية للمقارنة
                 const currentPrices = calculatePrices(priceUSDGold, priceUSDSilver);
 
-                // تحديد الفلاش كلاسات
                 const flashClasses = {
                     gold24: getFlashClass(currentPrices.gramOMRGold, previousPrices.gold24),
                     gold22: getFlashClass(currentPrices.gramOMRGold22, previousPrices.gold22),
@@ -518,283 +565,243 @@
                     silver925: getFlashClass(currentPrices.gramOMRSilver925, previousPrices.silver925),
                 };
 
-                // تحديث القيم السابقة
                 previousPrices = {
                     ...currentPrices,
                     usdGold: priceUSDGold,
                     usdSilver: priceUSDSilver
                 };
 
-                // الوقت والتاريخ
+                //
+                // 📅 التعديل الجديد هنا للتاريخ (سحر الجافاسكريبت):
                 const now = new Date();
-                const timeString = now.toLocaleTimeString('ar-OM', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const dateString = now.toLocaleDateString('ar-OM', { year: 'numeric', month: 'short', day: 'numeric' });
-                liveTimeText.textContent = timeString;
 
-                // حالة الأكورديون
+                const timeString = now.toLocaleTimeString('ar-OM-u-nu-latn', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+                // 'ar-OM-u-nu-latn' تعني: لغة عربية (عمان) + أرقام إنجليزية
+                // const dateString = now.toLocaleDateString('ar-OM-u-nu-latn', {
+                //     year: 'numeric',
+                //     month: 'long',
+                //     day: 'numeric'
+                // });
+
+                // 📅 التعديل الجديد هنا للتاريخ:
+              //  const now = new Date();
+                const day = now.getDate(); // يجلب اليوم كرقم إنجليزي (مثال: 9)
+                const year = now.getFullYear(); // يجلب السنة كرقم إنجليزي (مثال: 2026)
+                const month = now.toLocaleDateString('ar-OM', { month: 'long' }); // يجلب اسم الشهر بالعربية (مثال: يوليو)
+                const weekday = now.toLocaleDateString('ar', { weekday: 'long' });
+
+                const dateString = `${weekday}`; // النتيجة ستكون مثلاً: 9 يوليو 2026
+
                 const isGoldOpen = document.getElementById('goldAccordionContent')?.classList.contains('show');
-                const isSilverOpen = document.getElementById('silverAccordionContent')?.classList.contains('show');
 
-                // بناء الـ HTML
-                mainDashboard.innerHTML = `
-                    <div class="price-usd">
-                        أونصة الذهب: <span class="global-price">${priceUSDGold.toFixed(2)} $</span> &nbsp;|&nbsp; 
-                        أونصة الفضة: <span class="global-price">${priceUSDSilver.toFixed(2)} $</span>
-                    </div>
-                    
-                    <div class="section-title">جرام الذهب</div>
-                    <table class="karat-table">
-                        <tr class="most-karat ${flashClasses.gold24}">
-                            <td class="karat-title">عيار 24 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(999.)</span></td>
-                            <td class="karat-value">${currentPrices.gramOMRGold.toFixed(3)} ر.ع.</td>
-                        </tr>
-                        <tr class="sub-karat ${flashClasses.gold22}">
-                            <td class="karat-title">عيار 22 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(916.)</span></td>
-                            <td class="karat-value">${currentPrices.gramOMRGold22.toFixed(3)} ر.ع.</td>
-                        </tr>
-                        <tr class="most-karat ${flashClasses.gold21}">
-                            <td class="karat-title">عيار 21 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(875.)</span></td>
-                            <td class="karat-value">${currentPrices.gramOMRGold21.toFixed(3)} ر.ع.</td>
-                        </tr>
-                        <tr class="sub-karat ${flashClasses.gold880}">
-                            <td class="karat-title">عيار 21 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(880.)</span></td>
-                            <td class="karat-value">${currentPrices.gramOMRGold880.toFixed(3)} ر.ع.</td>
-                        </tr>
-                        <tr class="sub-karat ${flashClasses.gold18}">
-                            <td class="karat-title">عيار 18 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(750.)</span></td>
-                            <td class="karat-value">${currentPrices.gramOMRGold18.toFixed(3)} ر.ع.</td>
-                        </tr>
-                    </table>
+                    const isSilverOpen = document.getElementById('silverAccordionContent')?.classList.contains('show');
 
-                    <div class="section-title silver-border">الفضة</div>
-                    <table class="karat-table silver-table">
-                        <tr class="sub-karat ${flashClasses.silver999}">
-                            <td class="karat-title">جرام الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 999</span></td>
-                            <td class="karat-value">${currentPrices.gramOMRSilver999.toFixed(3)} ر.ع.</td>
-                        </tr>
-                        <tr class="sub-karat ${flashClasses.silver925}">
-                            <td class="karat-title">كيلو الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 9999</span></td>
-                            <td class="karat-value">${currentPrices.silverBarKilo.toFixed(3)} ر.ع.</td>
-                        </tr>
-                    </table>
+                    mainDashboard.innerHTML = `
+            <div class="price-usd">
+                أونصة الذهب: <span class="global-price">${priceUSDGold.toFixed(2)} $</span> &nbsp;|&nbsp; 
+                أونصة الفضة: <span class="global-price">${priceUSDSilver.toFixed(2)} $</span>
+            </div>
+            
+            <div class="section-title">جرام الذهب</div>
+            <table class="karat-table">
+                <tr class="most-karat ${flashClasses.gold24}">
+                    <td class="karat-title">عيار 24 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(999.)</span></td>
+                    <td class="karat-value">${currentPrices.gramOMRGold.toFixed(3)} ر.ع.</td>
+                </tr>
+                <tr class="sub-karat ${flashClasses.gold22}">
+                    <td class="karat-title">عيار 22 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(916.)</span></td>
+                    <td class="karat-value">${currentPrices.gramOMRGold22.toFixed(3)} ر.ع.</td>
+                </tr>
+                <tr class="most-karat ${flashClasses.gold21}">
+                    <td class="karat-title">عيار 21 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(875.)</span></td>
+                    <td class="karat-value">${currentPrices.gramOMRGold21.toFixed(3)} ر.ع.</td>
+                </tr>
+                <tr class="sub-karat">
+                    <td class="karat-title">عيار 21 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(880.)</span></td>
+                    <td class="karat-value">${currentPrices.gramOMRGold880.toFixed(3)} ر.ع.</td>
+                </tr>
+                <tr class="sub-karat ${flashClasses.gold18}">
+                    <td class="karat-title">عيار 18 <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(750.)</span></td>
+                    <td class="karat-value">${currentPrices.gramOMRGold18.toFixed(3)} ر.ع.</td>
+                </tr>
+            </table>
 
-                    <div class="accordion-header" id="goldHeader">
-                        <span><i class="fi fi-rr-box" style="vertical-align:middle; margin-left:6px; color:var(--primary-gold)"></i> سبائك الذهب الاستثمارية (24)</span>
-                        <span class="toggle-icon">${isGoldOpen ? '▲' : '▼'}</span>
-                    </div>
-                    <div class="accordion-content ${isGoldOpen ? 'show' : ''}" id="goldAccordionContent">
-                        <div class="bar-card"><span class="bar-name">سبيكة 1 جرام</span><span class="bar-price">${currentPrices.bar1gGold.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 2.5 جرام</span><span class="bar-price">${currentPrices.bar2_5gGold.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 5 جرام</span><span class="bar-price">${currentPrices.bar5gGold.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 10 جرام</span><span class="bar-price">${currentPrices.bar10gGold.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 20 جرام</span><span class="bar-price">${currentPrices.bar20gGold.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة أونصة</span><span class="bar-price">${currentPrices.barOunceGold.toFixed(3)} ر.ع.</span></div>
-                    </div>
+            <div class="section-title silver-border">الفضة</div>
+            <table class="karat-table silver-table">
+                <tr class="sub-karat ${flashClasses.silver999}">
+                    <td class="karat-title">جرام الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 999</span></td>
+                    <td class="karat-value">${currentPrices.gramOMRSilver999.toFixed(3)} ر.ع.</td>
+                </tr>
+                <tr class="sub-karat ${flashClasses.silver925}">
+                    <td class="karat-title">كيلو الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 9999</span></td>
+                    <td class="karat-value">${currentPrices.silverBarKilo.toFixed(3)} ر.ع.</td>
+                </tr>
+            </table>
 
-                    <div class="accordion-header silver-accordion" id="silverHeader">
-                        <span><i class="fi fi-rr-box" style="vertical-align:middle; margin-left:6px; color:var(--silver)"></i> سبائك الفضة الاستثمارية</span>
-                        <span class="toggle-icon">${isSilverOpen ? '▲' : '▼'}</span>
-                    </div>
-                    <div class="accordion-content ${isSilverOpen ? 'show' : ''}" id="silverAccordionContent">
-                        <div class="bar-card"><span class="bar-name">سبيكة أونصة</span><span class="bar-price">${currentPrices.silverBarOunce.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 50 جرام</span><span class="bar-price">${currentPrices.silverBar50g.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 100 جرام</span><span class="bar-price">${currentPrices.silverBar100g.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 250 جرام</span><span class="bar-price">${currentPrices.silverBar250g.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 500 جرام</span><span class="bar-price">${currentPrices.silverBar500g.toFixed(3)} ر.ع.</span></div>
-                        <div class="bar-card"><span class="bar-name">سبيكة 1 كيلو</span><span class="bar-price">${currentPrices.silverBarKilo.toFixed(3)} ر.ع.</span></div>
-                    </div>
+            <div class="accordion-header" id="goldHeader">
+                <span><i class="fi fi-rr-box" style="vertical-align:middle; margin-left:6px; color:var(--primary-gold)"></i> سبائك الذهب الاستثمارية (24)</span>
+                <span class="toggle-icon">${isGoldOpen ? '▲' : '▼'}</span>
+            </div>
+            <div class="accordion-content ${isGoldOpen ? 'show' : ''}" id="goldAccordionContent">
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة ذهب 1 جرام', '${currentPrices.bar1gGold.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 1 جرام</span><span class="bar-price">${currentPrices.bar1gGold.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة ذهب 2.5 جرام', '${currentPrices.bar2_5gGold.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 2.5 جرام</span><span class="bar-price">${currentPrices.bar2_5gGold.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة ذهب 5 جرام', '${currentPrices.bar5gGold.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 5 جرام</span><span class="bar-price">${currentPrices.bar5gGold.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة ذهب 10 جرام', '${currentPrices.bar10gGold.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 10 جرام</span><span class="bar-price">${currentPrices.bar10gGold.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة ذهب 20 جرام', '${currentPrices.bar20gGold.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 20 جرام</span><span class="bar-price">${currentPrices.bar20gGold.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة أونصة ذهب', '${currentPrices.barOunceGold.toFixed(3)}')">
+                    <span class="bar-name">سبيكة أونصة</span><span class="bar-price">${currentPrices.barOunceGold.toFixed(3)} ر.ع.</span>
+                </div>
+            </div>
 
-                    <div class="request-time">📅 ${dateString} | 🕐 ${timeString}</div>
-                `;
+            <div class="accordion-header silver-accordion" id="silverHeader">
+                <span><i class="fi fi-rr-box" style="vertical-align:middle; margin-left:6px; color:var(--silver)"></i> سبائك الفضة الاستثمارية</span>
+                <span class="toggle-icon">${isSilverOpen ? '▲' : '▼'}</span>
+            </div>
+            <div class="accordion-content ${isSilverOpen ? 'show' : ''}" id="silverAccordionContent">
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة أونصة فضة', '${currentPrices.silverBarOunce.toFixed(3)}')">
+                    <span class="bar-name">سبيكة أونصة</span><span class="bar-price">${currentPrices.silverBarOunce.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة فضة 50 جرام', '${currentPrices.silverBar50g.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 50 جرام</span><span class="bar-price">${currentPrices.silverBar50g.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة فضة 100 جرام', '${currentPrices.silverBar100g.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 100 جرام</span><span class="bar-price">${currentPrices.silverBar100g.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة فضة 250 جرام', '${currentPrices.silverBar250g.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 250 جرام</span><span class="bar-price">${currentPrices.silverBar250g.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة فضة 500 جرام', '${currentPrices.silverBar500g.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 500 جرام</span><span class="bar-price">${currentPrices.silverBar500g.toFixed(3)} ر.ع.</span>
+                </div>
+                <div class="bar-card" onclick="sendWhatsApp('سبيكة فضة 1 كيلو', '${currentPrices.silverBarKilo.toFixed(3)}')">
+                    <span class="bar-name">سبيكة 1 كيلو</span><span class="bar-price">${currentPrices.silverBarKilo.toFixed(3)} ر.ع.</span>
+                </div>
+            </div>
+             
+            <div class="request-time" dir="ltr" lang="en"> ${dateString}  🕐 ${timeString}</div>
+        `;
 
-                // إعادة ربط الأكورديون
-                setupAccordions();
-            }
-
-            // ============================================================
-            // 🧮 دوال مساعدة للحسابات
-            // ============================================================
-            function calculatePrices(priceUSDGold, priceUSDSilver) {
-                const gramOMRGold = (priceUSDGold * OMR_EXCHANGE_RATE) / ONE_GRAM;
-                const gramOMRGold22 = gramOMRGold * (22 / 24);
-                const gramOMRGold21 = gramOMRGold * 0.875;
-                const gramOMRGold880 = gramOMRGold * 0.880;
-                const gramOMRGold18 = gramOMRGold * (18 / 24);
-
-                const gramOMRSilver999 = (priceUSDSilver * OMR_EXCHANGE_RATE) / ONE_GRAM;
-                const gramOMRSilvWithPerm = ((priceUSDSilver + 2) * OMR_EXCHANGE_RATE) / ONE_GRAM;
-
-                // سبائك الذهب
-                const bar1gGold = gramOMRGold + 8;
-                const bar2_5gGold = (gramOMRGold * 2.5) + 9;
-                const bar5gGold = (gramOMRGold * 5) + 10.7;
-                const bar10gGold = (gramOMRGold * 10) + 12.5;
-                const bar20gGold = (gramOMRGold * 20) + 15;
-                const barOunceGold = (gramOMRGold * ONE_GRAM) + 20;
-
-                // سبائك الفضة
-                const silverBar50g = (gramOMRSilvWithPerm * 50) + 20.5;
-                const silverBarOunce = (gramOMRSilvWithPerm * ONE_GRAM) + 15.0;
-                const silverBar100g = (gramOMRSilvWithPerm * 100) + 25.0;
-                const silverBar250g = (gramOMRSilvWithPerm * 250) + 30.0;
-                const silverBar500g = (gramOMRSilvWithPerm * 500) + 35.0;
-                const silverBarKilo = (gramOMRSilvWithPerm * 1000) + 50.0;
-
-                return {
-                    gramOMRGold,
-                    gramOMRGold22,
-                    gramOMRGold21,
-                    gramOMRGold880,
-                    gramOMRGold18,
-                    gramOMRSilver999,
-                    gramOMRSilvWithPerm,
-                    bar1gGold,
-                    bar2_5gGold,
-                    bar5gGold,
-                    bar10gGold,
-                    bar20gGold,
-                    barOunceGold,
-                    silverBar50g,
-                    silverBarOunce,
-                    silverBar100g,
-                    silverBar250g,
-                    silverBar500g,
-                    silverBarKilo
-                };
-            }
-
-            // ============================================================
-            // 💚 دالة تحديد تأثير الفلاش
-            // ============================================================
-            function getFlashClass(newPrice, oldPrice) {
-                if (!oldPrice) return '';
-                const round = (v) => Math.round(v * 1000) / 1000;
-                const roundedNew = round(newPrice);
-                const roundedOld = round(oldPrice);
-                if (roundedNew > roundedOld) return 'bg-flash-up';
-                if (roundedNew < roundedOld) return 'bg-flash-down';
-                return '';
-            }
-
-            // ============================================================
-            // 📋 إعداد الأكورديون
-            // ============================================================
-            function setupAccordions() {
-                const goldHeader = document.getElementById('goldHeader');
-                const silverHeader = document.getElementById('silverHeader');
-
-                if (goldHeader) {
-                    goldHeader.removeEventListener('click', handleGoldAccordion);
-                    goldHeader.addEventListener('click', handleGoldAccordion);
+                    setupAccordions();
                 }
-                if (silverHeader) {
-                    silverHeader.removeEventListener('click', handleSilverAccordion);
-                    silverHeader.addEventListener('click', handleSilverAccordion);
+
+                // ============================================================
+                // 🧮 دوال مساعدة للحسابات (كما هي بدون تغيير)
+                // ============================================================
+                function calculatePrices(priceUSDGold, priceUSDSilver) {
+                    const gramOMRGold = (priceUSDGold * OMR_EXCHANGE_RATE) / ONE_GRAM;
+                    const gramOMRGold22 = gramOMRGold * (22 / 24);
+                    const gramOMRGold21 = gramOMRGold * 0.875;
+                    const gramOMRGold880 = gramOMRGold * 0.880;
+                    const gramOMRGold18 = gramOMRGold * (18 / 24);
+
+                    const gramOMRSilver999 = (priceUSDSilver * OMR_EXCHANGE_RATE) / ONE_GRAM;
+                    const gramOMRSilvWithPerm = ((priceUSDSilver + 2) * OMR_EXCHANGE_RATE) / ONE_GRAM;
+
+                    return {
+                        gramOMRGold, gramOMRGold22, gramOMRGold21, gramOMRGold880, gramOMRGold18,
+                        gramOMRSilver999, gramOMRSilvWithPerm,
+                        bar1gGold: gramOMRGold + 8,
+                        bar2_5gGold: (gramOMRGold * 2.5) + 9,
+                        bar5gGold: (gramOMRGold * 5) + 10.7,
+                        bar10gGold: (gramOMRGold * 10) + 12.5,
+                        bar20gGold: (gramOMRGold * 20) + 15,
+                        barOunceGold: (gramOMRGold * ONE_GRAM) + 20,
+                        silverBar50g: (gramOMRSilvWithPerm * 50) + 20.5,
+                        silverBarOunce: (gramOMRSilvWithPerm * ONE_GRAM) + 15.0,
+                        silverBar100g: (gramOMRSilvWithPerm * 100) + 25.0,
+                        silverBar250g: (gramOMRSilvWithPerm * 250) + 30.0,
+                        silverBar500g: (gramOMRSilvWithPerm * 500) + 35.0,
+                        silverBarKilo: (gramOMRSilvWithPerm * 1000) + 50.0
+                    };
                 }
-            }
 
-            function handleGoldAccordion() {
-                toggleAccordion('goldAccordionContent', 'goldHeader');
-            }
-
-            function handleSilverAccordion() {
-                toggleAccordion('silverAccordionContent', 'silverHeader');
-            }
-
-            function toggleAccordion(contentId, headerId) {
-                const content = document.getElementById(contentId);
-                const icon = document.getElementById(headerId).querySelector('.toggle-icon');
-                if (content && icon) {
-                    content.classList.toggle('show');
-                    icon.textContent = content.classList.contains('show') ? '▲' : '▼';
+                function getFlashClass(newPrice, oldPrice) {
+                    if (!oldPrice) return '';
+                    const round = (v) => Math.round(v * 1000) / 1000;
+                    if (round(newPrice) > round(oldPrice)) return 'bg-flash-up';
+                    if (round(newPrice) < round(oldPrice)) return 'bg-flash-down';
+                    return '';
                 }
-            }
 
-            // ============================================================
-            // 💬 عرض رسائل مؤقتة
-            // ============================================================
-            function showTemporaryMessage(message, bgColor = '#fff3cd') {
-                const existing = document.querySelector('.temp-message');
-                if (existing) existing.remove();
-
-                const div = document.createElement('div');
-                div.className = 'temp-message';
-                div.style.cssText = `
-                        padding: 10px 15px;
-                        margin: 10px 0;
-                        background: ${bgColor};
-                        border: 1px solid #ffc107;
-                        border-radius: 8px;
-                        font-size: 13px;
-                        color: #856404;
-                        animation: fadeIn 0.3s ease;
-                    `;
-                div.textContent = message;
-                mainDashboard.prepend(div);
-
-                setTimeout(() => {
-                    if (div.parentNode) {
-                        div.style.opacity = '0';
-                        div.style.transition = 'opacity 0.5s';
-                        setTimeout(() => div.remove(), 500);
+                // ============================================================
+                // 📋 إعداد الأكورديون (كما هي بدون تغيير)
+                // ============================================================
+                function setupAccordions() {
+                    const goldHeader = document.getElementById('goldHeader');
+                    const silverHeader = document.getElementById('silverHeader');
+                    if (goldHeader) {
+                        goldHeader.removeEventListener('click', handleGoldAccordion);
+                        goldHeader.addEventListener('click', handleGoldAccordion);
                     }
-                }, 5000);
-            }
-
-            function showError(message) {
-                mainDashboard.innerHTML = `
-                        <div class="error-message">
-                            ⚠️ ${message}
-                            <br><br>
-                            <button onclick="location.reload()" style="
-                                padding: 8px 20px;
-                                background: var(--primary-gold);
-                                color: white;
-                                border: none;
-                                border-radius: 8px;
-                                cursor: pointer;
-                                font-family: inherit;
-                                font-size: 14px;
-                            ">إعادة المحاولة</button>
-                        </div>
-                    `;
-            }
-
-            // ============================================================
-            // 🚀 تشغيل التطبيق
-            // ============================================================
-            // الجلب الأولي
-            fetchLivePrices();
-
-            // التحديث التلقائي
-            setInterval(fetchLivePrices, UPDATE_INTERVAL_MS);
-
-            // تحديث الوقت كل ثانية
-            setInterval(() => {
-                const now = new Date();
-                const timeString = now.toLocaleTimeString('ar-OM', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                if (liveTimeText) {
-                    liveTimeText.textContent = timeString;
-                }
-            }, 1000);
-
-            // إيقاف التحديث عندما تكون الصفحة في الخلفية (توفير الموارد)
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    // الصفحة غير مرئية - يمكن تقليل التحديثات
-                    if (updateTimeout) {
-                        clearTimeout(updateTimeout);
-                        updateTimeout = null;
+                    if (silverHeader) {
+                        silverHeader.removeEventListener('click', handleSilverAccordion);
+                        silverHeader.addEventListener('click', handleSilverAccordion);
                     }
-                } else {
-                    // الصفحة ظهرت مرة أخرى - تحديث فوري
-                    fetchLivePrices();
                 }
+
+                function handleGoldAccordion() { toggleAccordion('goldAccordionContent', 'goldHeader'); }
+                function handleSilverAccordion() { toggleAccordion('silverAccordionContent', 'silverHeader'); }
+
+                function toggleAccordion(contentId, headerId) {
+                    const content = document.getElementById(contentId);
+                    const icon = document.getElementById(headerId).querySelector('.toggle-icon');
+                    if (content && icon) {
+                        content.classList.toggle('show');
+                        icon.textContent = content.classList.contains('show') ? '▲' : '▼';
+                    }
+                }
+
+                // ============================================================
+                // 💬 عرض رسائل مؤقتة
+                // ============================================================
+                function showTemporaryMessage(message, bgColor = '#fff3cd') {
+                    const existing = document.querySelector('.temp-message');
+                    if (existing) existing.remove();
+                    const div = document.createElement('div');
+                    div.className = 'temp-message';
+                    div.style.cssText = `padding: 10px 15px; margin: 10px 0; background: ${bgColor}; border: 1px solid #ffc107; border-radius: 8px; font-size: 13px; color: #856404; animation: fadeIn 0.3s ease;`;
+                    div.textContent = message;
+                    mainDashboard.prepend(div);
+                    setTimeout(() => {
+                        if (div.parentNode) {
+                            div.style.opacity = '0';
+                            div.style.transition = 'opacity 0.5s';
+                            setTimeout(() => div.remove(), 500);
+                        }
+                    }, 5000);
+                }
+
+                function showError(message) {
+                    mainDashboard.innerHTML = `<div class="error-message">⚠️ ${message}<br><br><button onclick="location.reload()" style="padding: 8px 20px; background: var(--primary-gold); color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px;">إعادة المحاولة</button></div>`;
+                }
+
+                // ============================================================
+                // 🚀 تشغيل التطبيق الأساسي
+                // ============================================================
+                fetchLivePrices();
+                setInterval(fetchLivePrices, UPDATE_INTERVAL_MS);
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        if (updateTimeout) { clearTimeout(updateTimeout); updateTimeout = null; }
+                    } else {
+                        fetchLivePrices();
+                    }
+                });
+
+                console.log('✅ تطبيق أسعار الذهب والفضة يعمل بشكل آمن');
             });
-
-            console.log('✅ تطبيق أسعار الذهب والفضة يعمل بشكل آمن');
-            console.log('🔒 المفاتيح محمية عبر الخادم');
-        });
     </script>
 
 </body>
