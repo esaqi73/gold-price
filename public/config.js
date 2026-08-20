@@ -15,6 +15,7 @@ const CONFIG = {
     
     //  مصنعية سبائك الفضة (بالريال العُماني)
     silverFees: {
+        premium: 2,
         barOunce: 15,
         bar50g: 20,
         bar100g: 25,

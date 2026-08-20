@@ -746,19 +746,16 @@
             <div class="section-title">ذهب (TT Bar)</div>
             <table class="karat-table">
                 <tr id="row-tt-bar" class="sub-karat">
-                    <td class="karat-title">سبيكة 10 تولات<span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(999.)</span></td>
+                    <td class="karat-title">سبيكة 10 تولات <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(999.)</span></td>
                     <td id="val-bar-tt" class="karat-value">-- ر.ع.</td>
                 </tr>
             </table>
 
-            <div class="section-title silver-border">الفضة</div>
+            <div class="section-title silver-border">كيلو الفضة</div>
             <table class="karat-table silver-table">
-                <tr id="row-silver999" class="sub-karat">
-                    <td class="karat-title">جرام الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 999</span></td>
-                    <td id="val-silver-999" class="karat-value">-- ر.ع.</td>
-                </tr>
+                
                 <tr id="row-silver925" class="sub-karat">
-                    <td class="karat-title">كيلو الفضة <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">عيار 999.9</span></td>
+                    <td class="karat-title">سبيكة ألف جرام <span style="font-weight:normal; font-size:11px; color:var(--text-muted);">(999.)</span></td>
                     <td id="val-silver-kilo" class="karat-value">-- ر.ع.</td>
                 </tr>
             </table>
@@ -830,7 +827,7 @@
 
                     document.getElementById('val-bar-tt').textContent = prices.barTTGold.toFixed(3) + ' ر.ع.';
 
-                    document.getElementById('val-silver-999').textContent = prices.gramOMRSilver999.toFixed(3) + ' ر.ع.';
+                 //   document.getElementById('val-silver-999').textContent = prices.gramOMRSilver999.toFixed(3) + ' ر.ع.';
                     document.getElementById('val-silver-kilo').textContent = prices.silverBarKilo.toFixed(3) + ' ر.ع.';
 
                     document.getElementById('val-bar-g1').textContent = prices.bar1gGold.toFixed(3) + ' ر.ع.';
@@ -907,7 +904,7 @@
                     const gramOMRGold18 = gramOMRGold * (18 / 24);
 
                     const gramOMRSilver999 = (priceUSDSilver * OMR_EXCHANGE_RATE) / ONE_ONCE;
-                    const gramOMRSilvWithPerm = ((priceUSDSilver + 2) * OMR_EXCHANGE_RATE) / ONE_ONCE;
+                    const gramOMRSilvWithPerm = ((priceUSDSilver + CONFIG.silverFees.premium) * OMR_EXCHANGE_RATE) / ONE_ONCE;
 
                     return {
                         gramOMRGold, gramOMRGold22, gramOMRGold21, gramOMRGold880, gramOMRGold18,
